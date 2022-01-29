@@ -1,11 +1,6 @@
 import "./styles.css";
 
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Switch
-} from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import Navbar from "./components/Layout/navbar";
 import Landing from "./components/Layout/landing";
 import Register from "./components/Auth/register";
