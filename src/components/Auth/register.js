@@ -10,6 +10,7 @@ export default function Register() {
     password2: "",
     errors: {}
   });
+
   function handleChange(e) {
     const { id, value } = e.target;
     setUser({ ...user, [id]: value });
@@ -26,6 +27,7 @@ export default function Register() {
     password: user.password,
     password2: user.password2
   };
+
   const { errors } = user;
   return (
     <div className="Register">
