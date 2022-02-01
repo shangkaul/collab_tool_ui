@@ -7,8 +7,7 @@ export default function Register() {
     name: "",
     email: "",
     password: "",
-    password2: "",
-    errors: {}
+    password2: ""
   });
 
   function handleChange(e) {
@@ -28,7 +27,6 @@ export default function Register() {
     password2: user.password2
   };
 
-  const { errors } = user;
   return (
     <div className="Register">
       <div className="container">
@@ -51,7 +49,6 @@ export default function Register() {
                 <input
                   onChange={(e) => handleChange(e)}
                   value={user.name}
-                  error={errors.name}
                   id="name"
                   type="text"
                 />
@@ -61,7 +58,6 @@ export default function Register() {
                 <input
                   onChange={(e) => handleChange(e)}
                   value={user.email}
-                  error={errors.email}
                   id="email"
                   type="email"
                 />
@@ -71,7 +67,6 @@ export default function Register() {
                 <input
                   onChange={(e) => handleChange(e)}
                   value={user.password}
-                  error={errors.password}
                   id="password"
                   type="password"
                 />
@@ -81,7 +76,6 @@ export default function Register() {
                 <input
                   onChange={(e) => handleChange(e)}
                   value={user.password2}
-                  error={errors.password2}
                   id="password2"
                   type="password"
                 />

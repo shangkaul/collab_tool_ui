@@ -5,8 +5,7 @@ import { Link } from "react-router-dom";
 export default function Login() {
   var [user, setUser] = useState({
     email: "",
-    password: "",
-    errors: {}
+    password: ""
   });
   function handleChange(e) {
     const { id, value } = e.target;
@@ -22,7 +21,6 @@ export default function Login() {
     email: user.email,
     password: user.password
   };
-  const { errors } = user;
   return (
     <div className="Login">
       <div className="container">
@@ -45,7 +43,6 @@ export default function Login() {
                 <input
                   onChange={(e) => handleChange(e)}
                   value={user.email}
-                  error={errors.email}
                   id="email"
                   type="email"
                 />
@@ -55,7 +52,6 @@ export default function Login() {
                 <input
                   onChange={(e) => handleChange(e)}
                   value={user.password}
-                  error={errors.password}
                   id="password"
                   type="password"
                 />
