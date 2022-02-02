@@ -2,3 +2,30 @@
   font-family: sans-serif;
   text-align: center;
 }
+.full-width {
+  width: 100vw;
+  margin: auto;
+  font-weight: 400;
+  background-color: #ff9494;
+}
+.Dash {
+  margin: auto;
+  margin-top: 10vh;
+}
+
+.wsList {
+  display: flex;
+  padding: 2rem;
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.wsList > .card {
+  padding: 2rem 1rem;
+  margin: 1rem;
+  border-radius: 5px;
+  background-color: dodgerblue;
+  color: white;
+  text-transform: capitalize;
+  flex-basis: 25%;
+}

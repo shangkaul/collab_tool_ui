@@ -1,8 +1,11 @@
 import "../../styles.css";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import jwt_decode from "jwt-decode";
+import axios from "axios";
 
 export default function Login() {
+  let history = useHistory();
   var [user, setUser] = useState({
     email: "",
     password: ""
@@ -14,7 +17,24 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(userData.email);
+    axios
+      .post("https://collabserver.shangkaul.repl.co/users/login", userData)
+      .then((response) => {
+        console.log(response);
+        localStorage.setItem(
+          "collab_user_token",
+          jwt_decode(response.data.token)["id"]
+        );
+        history.push("/dashboard");
+      })
+      .catch((err) => {
+        console.log(err);
+        M.toast({
+          html: "Please recheck your credentials!",
+          classes: "full-width",
+          outDuration: 300
+        });
+      });
   };
 
   const userData = {

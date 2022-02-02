@@ -1,8 +1,10 @@
 import "../../styles.css";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 
 export default function Register() {
+  let history = useHistory();
   var [user, setUser] = useState({
     name: "",
     email: "",
@@ -17,7 +19,20 @@ export default function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(newUser.name);
+    axios
+      .post("https://collabserver.shangkaul.repl.co/users/register", newUser)
+      .then((response) => {
+        console.log(response);
+        history.push("/login");
+      })
+      .catch((err) => {
+        console.log(err);
+        M.toast({
+          html: "Please recheck your credentials!",
+          classes: "full-width",
+          outDuration: 300
+        });
+      });
   };
 
   const newUser = {
