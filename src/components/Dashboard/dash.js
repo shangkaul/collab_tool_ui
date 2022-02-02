@@ -29,7 +29,7 @@ export default function Dash() {
         <ul className="wsList">
           {wsList.map((ws) => (
             <Link
-              to={{ pathname: "/workspace", id: ws._id }}
+              to={{ pathname: "/workspace", id: ws._id, name: ws.name }}
               className="waves-effect card"
               key={ws._id}
             >
