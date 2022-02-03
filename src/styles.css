@@ -51,7 +51,7 @@
   flex-wrap: wrap;
   position: relative;
 }
-.taskList:last-child {
+.task:last-child {
   border-bottom: 0.1rem solid lightgray;
 }
 .taskHead {
@@ -61,4 +61,25 @@
 }
 .taskContent {
   padding: 0.5rem;
+}
+.Workspace > .btn {
+  margin-top: 20px;
+}
+
+.task > .icon_bar {
+  position: absolute;
+  right: 0;
+  display: flex;
+  padding: 1rem;
+  margin-left: auto;
+}
+.icon_bar > span {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: 0.2s;
+  border-radius: 50%;
+}
+.icon_bar > span:hover {
+  background-color: dodgerblue;
+  color: white;
 }
