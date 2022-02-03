@@ -2,6 +2,10 @@
   font-family: sans-serif;
   text-align: center;
 }
+
+.Navbar {
+  background-color: dodgerblue;
+}
 .full-width {
   width: 100vw;
   margin: auto;

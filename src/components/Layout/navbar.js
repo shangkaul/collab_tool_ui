@@ -9,11 +9,19 @@ export default function Navbar() {
           <Link
             to="/"
             style={{
-              fontFamily: "monospace"
+              fontFamily: "monospace",
+              fontSize: " 1.5rem"
             }}
             className="col s5 brand-logo center black-text"
           >
-            <i className="material-icons">code</i>
+            <i
+              style={{
+                fontSize: " 1.5rem"
+              }}
+              className="material-icons"
+            >
+              edit
+            </i>
             Collab Tool
           </Link>
         </div>

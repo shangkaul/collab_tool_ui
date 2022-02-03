@@ -5,6 +5,9 @@
   "keywords": [],
   "main": "src/index.js",
   "dependencies": {
+    "@emotion/react": "11.7.1",
+    "@emotion/styled": "11.6.0",
+    "@mui/material": "5.4.0",
     "axios": "0.25.0",
     "classnames": "2.3.1",
     "is-empty": "1.2.0",
