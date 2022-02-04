@@ -7,14 +7,12 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 
-import io from "socket.io-client";
-const ENDPOINT = "https://collabserver.shangkaul.repl.co";
+import { socket } from "../services/socket";
 
 export default function Workspace(props) {
-  const ws_id = "61fa27a6d4834110237cb59e"; //props.location.id;
-  const ws_name = "super team"; //props.location.name;
+  const ws_id = props.location.id;
+  const ws_name = props.location.name;
   const [refreshCount, setReRefreshCount] = useState(0);
-  var socket = io(ENDPOINT);
 
   socket.on("connect", () => {
     console.log(socket.id); // "G5p5..."
@@ -25,6 +23,7 @@ export default function Workspace(props) {
 
   socket.on("client_refresh", (x) => {
     setReRefreshCount(refreshCount + 1);
+    console.log("refresh called");
   });
 
   var [taskList, setTaskList] = useState([]);
