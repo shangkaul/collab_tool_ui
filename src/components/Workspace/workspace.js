@@ -1,20 +1,34 @@
 import "../../styles.css";
-import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 
+import io from "socket.io-client";
+const ENDPOINT = "https://collabserver.shangkaul.repl.co";
+
 export default function Workspace(props) {
-  const token = localStorage.getItem("collab_user_token");
   const ws_id = "61fa27a6d4834110237cb59e"; //props.location.id;
   const ws_name = "super team"; //props.location.name;
+  const [refreshCount, setReRefreshCount] = useState(0);
+  var socket = io(ENDPOINT);
+
+  socket.on("connect", () => {
+    console.log(socket.id); // "G5p5..."
+  });
+  socket.on("connect_error", (err) => {
+    console.log(`connect_error due to ${err.message}`);
+  });
+
+  socket.on("client_refresh", (x) => {
+    setReRefreshCount(refreshCount + 1);
+  });
 
   var [taskList, setTaskList] = useState([]);
+
   //Modal
   var [task, setTask] = useState({
     id: "",
@@ -43,6 +57,7 @@ export default function Workspace(props) {
   };
 
   function handleEdit(e, id, title, content) {
+    console.log("refresh");
     setTask({
       id: id,
       title: title,
@@ -61,9 +76,10 @@ export default function Workspace(props) {
       .catch((err) => {
         console.log(err);
       });
+    socket.emit("refresh_task", ws_id);
   };
   const submitTask = () => {
-    if (task.title == "" || task.content == "") {
+    if (task.title === "" || task.content === "") {
       alert("Incomplete values in task, add again.");
     } else {
       axios
@@ -77,10 +93,11 @@ export default function Workspace(props) {
           alert(err);
         });
     }
+    socket.emit("refresh_task", ws_id);
   };
-  var body = { ws_id: ws_id };
   useEffect(() => {
-    console.log("use Effect called");
+    var body = { ws_id: ws_id };
+
     axios
       .post("https://collabserver.shangkaul.repl.co/task/fetchTask", body)
       .then((response) => {
@@ -89,8 +106,8 @@ export default function Workspace(props) {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
-  // console.log(taskList);
+  }, [refreshCount]);
+  // console.log(response);
   return (
     <div className="Workspace">
       <div className="workspaceHead">{ws_name}</div>
