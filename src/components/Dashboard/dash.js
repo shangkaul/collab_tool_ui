@@ -38,6 +38,11 @@ export default function Dash() {
           ))}
         </ul>
       </div>
+      <Link to="/createWs">
+        <button className="btn-floating btn-large waves-effect waves-light blue">
+          <i className="material-icons">add</i>
+        </button>
+      </Link>
     </div>
   );
 }

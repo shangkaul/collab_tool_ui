@@ -87,3 +87,8 @@
   background-color: dodgerblue;
   color: white;
 }
+.btn-floating {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+}

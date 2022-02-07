@@ -94,10 +94,10 @@ export default function Login() {
             </form>
           </div>
         </div>
-        <div style={{fontWeight:600}}>Debugging Credentials</div><br/>
+        <div style={{ fontWeight: 600 }}>Debugging Credentials</div>
+        <br />
         <div>Email: admin@admin.com</div>
         <div>Password: admin@1234</div>
-
       </div>
     </div>
   );

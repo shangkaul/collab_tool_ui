@@ -7,6 +7,7 @@ import Register from "./components/Auth/register";
 import Login from "./components/Auth/login";
 import Dash from "./components/Dashboard/dash";
 import Workspace from "./components/Workspace/workspace";
+import CreateWs from "./components/Dashboard/createWs";
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
         <Route exact path="/register" component={Register} />
         <Route exact path="/dashboard" component={Dash} />
         <Route exact path="/workspace" component={Workspace} />
+        <Route exact path="/createWs" component={CreateWs} />
       </div>
     </Router>
   );
