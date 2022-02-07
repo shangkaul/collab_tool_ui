@@ -71,11 +71,11 @@ export default function Workspace(props) {
       .post("https://collabserver.shangkaul.repl.co/task/delTask", body)
       .then((response) => {
         console.log(id + "deleted");
+        socket.emit("refresh_task", ws_id);
       })
       .catch((err) => {
         console.log(err);
       });
-    socket.emit("refresh_task", ws_id);
   };
   const submitTask = () => {
     if (task.title === "" || task.content === "") {
@@ -86,13 +86,13 @@ export default function Workspace(props) {
         .then((response) => {
           console.log(response);
           setOpen(false);
+          socket.emit("refresh_task", ws_id);
         })
         .catch((err) => {
           console.log(err);
           alert(err);
         });
     }
-    socket.emit("refresh_task", ws_id);
   };
   useEffect(() => {
     var body = { ws_id: ws_id };
