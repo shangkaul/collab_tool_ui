@@ -97,7 +97,7 @@ export default function Login() {
         <div style={{ fontWeight: 600 }}>Debugging Credentials</div>
         <br />
         <div>Email: admin@admin.com</div>
-        <div>Password: admin@1234</div>
+        <div>Password: admin1234</div>
       </div>
     </div>
   );
