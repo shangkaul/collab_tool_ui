@@ -5,6 +5,7 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 
+
 sc = SparkContext()
 glueContext = GlueContext(sc)
 spark = glueContext.spark_session
@@ -17,6 +18,7 @@ from urllib.parse import urlparse
 import pandas as pd
 import pandera as pa
 import datetime as dt
+import time
 import logging
 import json
 import copy
@@ -272,7 +274,47 @@ def clean_schema(lst):
         schema.append(col)
     
     return schema
+    
+def validate_ts(ts):
+    """Check if the pandas column has all timestamp values.
 
+    Args:
+        ts: Pandas Series (col)
+    Returns:
+    bool
+    """
+    try:
+      for i in ts:
+          if i == "":
+              continue
+          time.strptime(i, '%m/%d/%Y %H:%M')
+      return True
+    except ValueError as e:
+        logger.warning(e)
+        return False
+
+def write_to_parquet(source,path):
+    """Write file to parquet.
+
+    Args:
+        ts: Pandas Series (col)
+    Returns:
+    bool
+    """
+    try:
+        df=pd.read_csv(path)
+        s3_uri=config['s3_base_uri']
+        table_path=eval(f'''f"{config['landing_dir']}"''')
+        file_name=path.split('/')[-1]
+        table_name=file_name.split('.')[0]
+        table_path=s3_uri+table_path+table_name+'/'+table_name+".parquet"
+        print(table_path)
+        df.to_parquet(table_path)
+        msg=f"Parquet data written to -> {table_path}"
+        logger.info(msg)
+      
+    except Exception as e:
+        logger.error(e)
 
 def perform_business_checks(source,file_path):
     """The method performs DQ checks based on specific business rules. These include - 
@@ -299,13 +341,33 @@ def perform_business_checks(source,file_path):
         if set(clean_schema(control_schema)) != set(clean_schema(curr_schema)):
             msg=f"Column check failed for: {file}"
             logger.warning(msg)
-            setLog(msg,"Schema Check")
+            setLog(msg,"Column Check")
             status=False
+            return status
         else:
             msg=f"Column check passed for: {file}"
             logger.info(msg)
             # setLog(msg,"Schema Check")
-
+        
+        #DQ4: Schema check - data type
+        # DQ3: File Column Check
+        df.columns=clean_schema(df.columns)
+        col_map={}
+        file_name=file_path.split('/')[-1]
+        for k,v in config["sources"][source]["col_map"][file_name].items():
+            col_map[k]=eval(v)
+        schema = pa.DataFrameSchema(columns=col_map,strict=True)
+        try:
+          schema.validate(df)
+          msg=f"Schema data type check passed for: {file_name}"
+          logger.info(msg)
+        except pa.errors.SchemaError as e:
+          msg=f"Data type schema check failed for: {file_name}"
+          logger.warning(msg)
+          setLog(msg,"Schema - Data Type Check")
+          status=False
+          return status
+            
         return status
 
     except Exception as e:
@@ -370,6 +432,7 @@ def main():
                     if business_dq_status == True:
                         msg=f"Business Rule DQ checks passed for {file}"
                         logger.info(msg)
+                        write_to_parquet(source,file_path)
                         # setTaskVal(source,file,config["success_flag"],"")#write external table...
                     else:
                         logger.warning(f"One or more business rule DQ checks failed for file: {file}")
