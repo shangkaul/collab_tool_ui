@@ -18,6 +18,9 @@ from urllib.parse import urlparse
 import pandas as pd
 import pandera as pa
 import datetime as dt
+from dateutil import parser
+import pyarrow
+import pyarrow.parquet as pq
 import time
 import logging
 import json
@@ -287,34 +290,37 @@ def validate_ts(ts):
       for i in ts:
           if i == "":
               continue
-          time.strptime(i, '%m/%d/%Y %H:%M')
+          parser.parse(i)
       return True
     except ValueError as e:
-        logger.warning(e)
+        logger.warning(f"Not a timestamp->{e}")
         return False
 
-def write_to_parquet(source,path):
+def write_to_parquet(df,path,mode):
     """Write file to parquet.
 
     Args:
-        ts: Pandas Series (col)
+        df: dataframe to write
+        path: Path to write to
+        mode: overwrite/append
     Returns:
     bool
     """
     try:
-        df=pd.read_csv(path)
-        s3_uri=config['s3_base_uri']
-        table_path=eval(f'''f"{config['landing_dir']}"''')
-        file_name=path.split('/')[-1]
-        table_name=file_name.split('.')[0]
-        table_path=s3_uri+table_path+table_name+'/'+table_name+".parquet"
-        print(table_path)
-        df.to_parquet(table_path)
-        msg=f"Parquet data written to -> {table_path}"
-        logger.info(msg)
-      
+        table_name=path.split('/')[-2]
+        table_name=table_name+".parquet"
+        if mode=="append":
+            df['date_partition'] = curr_dt
+            df.to_parquet(path,partition_cols=['date_partition'])
+            msg=f"Parquet data written to -> {path}"
+            logger.info(msg)
+            
+        if mode=="overwrite":
+            df.to_parquet(path+table_name)
+            msg=f"Parquet data written to -> {path}"
+            logger.info(msg)
     except Exception as e:
-        logger.error(e)
+        logger.error(f"Error writing as parquet ->{e}")
 
 def perform_business_checks(source,file_path):
     """The method performs DQ checks based on specific business rules. These include - 
@@ -333,7 +339,12 @@ def perform_business_checks(source,file_path):
         logger.info(f"Starting Business rule DQ Checks for: {file}")
         
         #ADD -> Check if filename in source: col_map -> if not just return False, file will be moved to error location.
-        
+        if file not in list(config["sources"][source]["col_map"].keys()):
+            msg=f"{file} not in config list of files for {source}"
+            logger.warning(msg)
+            setLog(msg,"File Name Check")
+            return False
+            
         # DQ3: File Column Check
         df=pd.read_csv(file_path)
         control_schema=list(config["sources"][source]["col_map"][file].keys())
@@ -362,7 +373,7 @@ def perform_business_checks(source,file_path):
           msg=f"Schema data type check passed for: {file_name}"
           logger.info(msg)
         except pa.errors.SchemaError as e:
-          msg=f"Data type schema check failed for: {file_name}"
+          msg=f"Data type schema check failed for: {file_name} due to ->{e}"
           logger.warning(msg)
           setLog(msg,"Schema - Data Type Check")
           status=False
@@ -432,8 +443,14 @@ def main():
                     if business_dq_status == True:
                         msg=f"Business Rule DQ checks passed for {file}"
                         logger.info(msg)
-                        write_to_parquet(source,file_path)
-                        # setTaskVal(source,file,config["success_flag"],"")#write external table...
+                        
+                        df=pd.read_csv(file_path)
+                        table_path=eval(f'''f"{config['landing_dir']}"''')
+                        file_name=file_path.split('/')[-1]
+                        table_name=file_name.split('.')[0]
+                        table_path=s3_uri+table_path+table_name+'/'
+                        write_to_parquet(df,table_path,"append")
+                        setTaskVal(source,file,config["success_flag"],"")#write external table...
                     else:
                         logger.warning(f"One or more business rule DQ checks failed for file: {file}")
                         err_path=eval(f'''f"{config['error_folder']}"''')
@@ -454,6 +471,9 @@ def main():
     except Exception as e:
         logger.error(e)
         raise e
+    finally:
+        exit_status["DQ Logs"] = exit_status["DQ Logs"].map(str)
+        write_to_parquet(exit_status,"s3://cte-project/landing/dq/job_result/","overwrite")
     
 # --------------------Global declarations---------------------
 
@@ -470,7 +490,7 @@ logging.getLogger('fsspec').setLevel(logging.CRITICAL)
 logging.getLogger('asyncio').setLevel(logging.CRITICAL)
 
 
-config_path="s3://cte-test-bucket/raw/config/config.json"
+config_path="s3://cte-project/raw/config/config.json"
 
 global err_msgs,config,exit_status,curr_dt,layer,s3_connect
 s3_connect = boto3.client('s3')
@@ -484,4 +504,3 @@ exit_status=pd.DataFrame(columns=config["status_dict_cols"])
 
 
 main()
-print(exit_status)
