@@ -178,7 +178,18 @@ def directoryExists(path):
     except ClientError:
         return False
     return True
-    
+
+def emptyDir(path):
+    file_list=listDir(path)
+    s3 = boto3.resource('s3')
+    bucket,key=extractBotoParams(path)
+    print("--------------")
+    for file in file_list:
+        s3.Object(bucket, file).delete()
+        
+    msg=f"Partition {curr_dt} cleaned."
+    logger.info(msg)
+        
 def listDir(path):
     """List all files present in dir and return list.
 
@@ -310,6 +321,9 @@ def write_to_parquet(df,path,mode):
         table_name=path.split('/')[-2]
         table_name=table_name+".parquet"
         if mode=="append":
+            if len(listDir(path+"date_partition="+curr_dt+"/"))>0:
+                emptyDir(path+"date_partition="+curr_dt+"/")
+
             df['date_partition'] = curr_dt
             df.to_parquet(path,partition_cols=['date_partition'])
             msg=f"Parquet data written to -> {path}"
@@ -490,7 +504,7 @@ logging.getLogger('fsspec').setLevel(logging.CRITICAL)
 logging.getLogger('asyncio').setLevel(logging.CRITICAL)
 
 
-config_path="s3://cte-project/raw/config/config.json"
+config_path="s3://cte-project/config/config.json"
 
 global err_msgs,config,exit_status,curr_dt,layer,s3_connect
 s3_connect = boto3.client('s3')
